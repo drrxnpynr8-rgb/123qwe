@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Для тебя ❤️</title>
+
+<link href="https://fonts.cdnfonts.com/css/minecraft-4" rel="stylesheet">
+
+<style>
+  body{
+    margin:0;
+    font-family:'Minecraft', Arial, sans-serif;
+    height:100vh;
+    overflow:hidden;
+    background:#000;
+  }
+
+  .slide{
+    display:none;
+    width:100%;
+    height:100%;
+    position:absolute;
+    top:0; left:0;
+    justify-content:center;
+    align-items:center;
+    z-index:1;
+  }
+  .active{ display:flex; }
+
+  /* --- Меню / Напоминалка --- */
+  .menu{
+    background:#111;
+    color:#fff;
+    flex-direction:column;
+    gap:20px;
+  }
+  .menu button{
+    font-size:24px;
+    padding:15px 30px;
+    background:#ff0033;
+    color:#fff;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+  }
+
+  /* Дождь комплиментов на Напоминалке */
+  .complWord{
+    position:fixed;
+    top:-30px;
+    color:#ff0033;
+    font-size:28px;
+    font-weight:bold;
+    z-index:999;
+    pointer-events:none;
+    animation: fallWords 7s linear forwards;
+    text-shadow: 0 2px 0 rgba(0,0,0,0.25);
+  }
+  @keyframes fallWords{
+    from { transform: translateY(-10vh); }
+    to   { transform: translateY(110vh); }
+  }
+
+  /* --- Фоны слайдов поздравления --- */
+  .slide1{ background:url("fon.jpg") center/cover no-repeat; }
+
+  .slide2,.slide3{
+    background: repeating-linear-gradient(
+      45deg,
+      #ffb3b3,
+      #ffb3b3 20px,
+      #ffc1c1 20px,
+      #ffc1c1 40px
+    );
+  }
+
+  .card{
+    background:#fff;
+    padding:20px;
+    border-radius:20px;
+    width:440px;
+    text-align:center;
+    position:relative;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+  }
+
+  img{
+    width:100%;
+    border-radius:15px;
+    margin-bottom:10px;
+    display:block;
+  }
+
+  /* --- Сердечки (только на 1 слайде) --- */
+  .hearts{
+    position:fixed;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:10;
+  }
+  .heart{
+    position:absolute;
+    color:pink;
+    animation: fallHearts linear infinite;
+  }
+  @keyframes fallHearts{
+    from{ transform:translateY(-10vh); }
+    to{ transform:translateY(110vh); }
+  }
+
+  /* --- Кнопки --- */
+  button{
+    padding:10px 20px;
+    border-radius:10px;
+    border:none;
+    cursor:pointer;
+    margin-top:10px;
+    font-family:'Minecraft', Arial, sans-serif;
+  }
+  .start{ background:#ff0033; color:#fff; }
+
+  /* --- Слайд 2: игра --- */
+  .wrong{
+    font-size:26px;
+    color:red;
+    opacity:0;
+    transition:0.5s;
+    margin-top:10px;
+  }
+
+  .finalWrap{
+    display:none;
+    align-items:center;
+    justify-content:center;
+    gap:20px;
+    margin-top:15px;
+  }
+  .star{
+    width:300px; /* побольше */
+    animation: spinGrow 9s ease forwards;
+  }
+  @keyframes spinGrow{
+    0%   { transform: scale(0.2) rotate(0deg); }
+    100% { transform: scale(1.35) rotate(2160deg); } /* 6 оборотов */
+  }
+  .finalText{
+    font-size:28px;
+    max-width:240px;
+    margin-left:40px; /* как ты попросил */
+  }
+
+  .starFX{
+    position:fixed;
+    font-size:22px;
+    animation: fallFx 3s linear forwards;
+    z-index:50;
+    pointer-events:none;
+  }
+  @keyframes fallFx{
+    from{ transform:translateY(-100vh); }
+    to{ transform:translateY(100vh); }
+  }
+
+  /* --- Слайд 3 --- */
+  .jokeTitle{
+    font-size:48px;
+    margin-bottom:10px;
+  }
+
+  /* --- Слайд 4 (таймер) --- */
+  .timerTitle{ font-size:32px; }
+  .bigTimer{
+    font-size:56px; /* крупнее */
+    margin:15px 0;
+    line-height:1.25;
+  }
+
+  /* --- Слайд 5 --- */
+  .loveText{ font-size:22px; margin-top:10px; }
+
+  /* дождь "очень" на 5 слайде (как у тебя уже было) */
+  .veryWord{
+    position:fixed;
+    color:red;
+    font-size:28px;
+    font-weight:bold;
+    z-index:999;
+    animation: fallWords 6s linear forwards;
+    pointer-events:none;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="hearts" id="hearts"></div>
+
+<!-- 0 СЛАЙД — МЕНЮ -->
+<div class="slide menu active" id="slide0">
+  <button onclick="next(1)">Поздравление</button>
+  <button onclick="next('reminder')">Напоминалка</button>
+</div>
+
+<!-- НАПОМИНАЛКА (отдельная ветка) -->
+<div class="slide menu" id="slidereminder">
+  <div style="font-size:22px; opacity:.9;">Жми “Назад”, когда захочешь 😌</div>
+  <button onclick="next(0)">Назад</button>
+</div>
+
+<!-- 1 СЛАЙД -->
+<div class="slide slide1" id="slide1">
+  <div class="card">
+    <img src="girl.jpg" alt="">
+    <h2>Привет, красотуля ❤️</h2>
+    <p>Готовься улыбаться 😌</p>
+    <button class="start" onclick="next(2)">Начать</button>
+  </div>
+</div>
+
+<!-- 2 СЛАЙД -->
+<div class="slide slide2" id="slide2">
+  <div class="card" id="slide2Card">
+    <h2>Как зовут самую красивую девочку на планете?</h2>
+    <input id="answer" placeholder="Введи ответ" style="padding:10px; width:90%; margin-top:10px;">
+    <button onclick="submitAnswer()">Подтвердить</button>
+
+    <div id="wrong" class="wrong">Неверно! 😌</div>
+    <button id="runBtn" class="start" style="display:none;">Правильный ответ</button>
+
+    <div id="finalWrap" class="finalWrap">
+      <img src="star.jpg" class="star" alt="">
+      <div class="finalText">ЭТО ЖЕ МИЛАНА СТАР!</div>
+    </div>
+  </div>
+</div>
+
+<!-- 3 СЛАЙД -->
+<div class="slide slide3" id="slide3">
+  <div class="card">
+    <div class="jokeTitle">
+      ШУТКА!<br>
+      <span style="font-size:22px;">
+        На самом деле, вот самая красивая девочка на свете, её зовут Агатулька!
+      </span>
+    </div>
+    <img src="123.jpg" alt="">
+    <button class="start" onclick="next(4)">Далее</button>
+  </div>
+</div>
+
+<!-- 4 СЛАЙД -->
+<div class="slide slide3" id="slide4">
+  <div class="card">
+    <div class="timerTitle">МЫ ВМЕСТЕ УЖЕ</div>
+    <div id="timer" class="bigTimer">...</div>
+    <button class="start" onclick="next(5)">Дальше</button>
+  </div>
+</div>
+
+<!-- 5 СЛАЙД -->
+<div class="slide slide3" id="slide5">
+  <div class="card">
+    <img src="mi.jpg" alt="">
+    <div class="loveText">
+      Ты для меня самое яркое солнышко!
+ больше чем просто любовь, ты мой человек мечты! 	
+	Я тебя очень очень сильно люблю!(сердечко)
+    </div>
+  </div>
+</div>
+
+<script>
+  /* --- Навигация --- */
+  function next(n){
+    document.querySelectorAll('.slide').forEach(s=>s.classList.remove('active'));
+    document.getElementById("slide"+n).classList.add('active');
+  }
+
+  /* --- Сердечки только на 1 слайде --- */
+  function heart(){
+    const h=document.createElement("div");
+    h.className="heart";
+    h.innerText="❤️";
+    h.style.left=Math.random()*100+"vw";
+    h.style.animationDuration=(4+Math.random()*4)+"s";
+    h.style.fontSize=(12+Math.random()*22)+"px";
+    document.getElementById("hearts").appendChild(h);
+    setTimeout(()=>h.remove(),8000);
+  }
+
+  setInterval(()=>{
+    if(document.getElementById("slide1").classList.contains("active")){
+      heart();
+    }
+  },500);
+
+  /* --- Слайд 2: ввод по Enter --- */
+  document.addEventListener("keydown",(e)=>{
+    if(e.key === "Enter" && document.getElementById("slide2").classList.contains("active")){
+      submitAnswer();
+    }
+  });
+
+  /* --- Игра на слайде 2 --- */
+  let jumps=0;
+  let answered=false;
+
+  function submitAnswer(){
+    if(answered) return;
+    answered=true;
+
+    const w=document.getElementById("wrong");
+    w.style.opacity=1;
+
+    setTimeout(()=>{
+      document.getElementById("runBtn").style.display="inline-block";
+    },2000);
+  }
+
+  document.getElementById("runBtn").onclick=()=>{
+    const btn=document.getElementById("runBtn");
+
+    if(jumps<7){
+      jumps++;
+      btn.style.position="absolute";
+
+      // телепорт по всему слайду (по карточке)
+      const card = document.getElementById("slide2Card");
+      const rect = card.getBoundingClientRect();
+
+      // размеры кнопки (примерно)
+      const bw = btn.offsetWidth || 160;
+      const bh = btn.offsetHeight || 40;
+
+      const maxX = Math.max(10, rect.width - bw - 10);
+      const maxY = Math.max(10, rect.height - bh - 10);
+
+      btn.style.left = Math.floor(Math.random()*maxX) + "px";
+      btn.style.top  = Math.floor(Math.random()*maxY) + "px";
+    } else {
+      finish();
+    }
+  };
+
+  function finish(){
+    document.getElementById("runBtn").style.display="none";
+    document.getElementById("finalWrap").style.display="flex";
+    fireworks();
+
+    // 9 сек анимация + 2.5 сек пауза = 11.5 сек -> на слайд 3
+    setTimeout(()=>next(3), 11500);
+  }
+
+  function fireworks(){
+    for(let i=0;i<60;i++){
+      const s=document.createElement("div");
+      s.className="starFX";
+      s.innerText="⭐";
+      s.style.left=Math.random()*100+"vw";
+      document.body.appendChild(s);
+      setTimeout(()=>s.remove(),3000);
+    }
+  }
+
+  /* --- Таймер (слайд 4) --- */
+  const startDate = new Date(2024,1,8,21,50,0); // 8 Feb 2024 21:50
+
+  function updateTimer(){
+    const now = new Date();
+    const diff = now - startDate;
+
+    const d=Math.floor(diff/(1000*60*60*24));
+    const h=Math.floor(diff/(1000*60*60)%24);
+    const m=Math.floor(diff/(1000*60)%60);
+    const s=Math.floor(diff/1000%60);
+
+    const el = document.getElementById("timer");
+    if(el){
+      el.innerHTML = `${d} дней<br>${h} часов<br>${m} минут<br>${s} секунд`;
+    }
+  }
+  setInterval(updateTimer,1000);
+  updateTimer();
+
+  /* --- Дождь "очень" на 5 слайде --- */
+  function very(){
+    const v=document.createElement("div");
+    v.className="veryWord";
+    v.innerText="очень";
+    v.style.left=Math.random()*100+"vw";
+    document.body.appendChild(v);
+    setTimeout(()=>v.remove(),6000);
+  }
+
+  setInterval(()=>{
+    if(document.getElementById("slide5").classList.contains("active")){
+      very();
+    }
+  },400);
+
+  /* --- Напоминалка: дождь комплиментов (рандомно) --- */
+  const compliments = [
+    "красивая","умная","заботливая","привлекательная","сексуальная","добрая","нежная","милая",
+    "очаровательная","обворожительная","неповторимая","неописуемая","незабываемая","неотразимая",
+    "шикарная","ослепительная","страстная","недоступная","божественная","завораживающая","ангельская",
+    "лучезарная","сексапильная","яркая","пушистая","обалденная","сногсшибательная","стройная",
+    "обольстительная","кокетливая","утончённая","грациозная","весёлая","энергичная","креативная",
+    "стильная","коммуникабельная","тактичная","любвеобильная","романтичная","разносторонняя","сказочная",
+    "симпатичная","пылкая","единственная","ласковая","сладенькая","умопомрачительная","желанная",
+    "непредсказуемая","загадочная","цветущая","безупречная","гармоничная","отзывчивая","совершенная",
+    "лучшая","скромная","изысканная","шаловливая","отпадная","искренная","дружелюбная","понимающая",
+    "экстравагантная","мечтательная","ароматная","искромётная","чистолюбивая","манящая","восторженная",
+    "бескорыстная","непосредственная","соблазнительная","одурманивающая","жизнерадостная","прелестная",
+    "улыбчивая","застенчивая","зажигательная","честная","возбуждающая","чистосердечная","игривая",
+    "обаятельная","целеустремлённая","дивная","женственная","блаженная","бесподобная","ненаглядная",
+    "необходимая","изумительная","трогательная","миниатюрная","любимая","самая-самая"
+  ];
+
+  function dropCompliment(){
+    const w=document.createElement("div");
+    w.className="complWord";
+    w.innerText = compliments[Math.floor(Math.random()*compliments.length)];
+    w.style.left = Math.random()*100 + "vw";
+    w.style.fontSize = (22 + Math.random()*22) + "px";
+    document.body.appendChild(w);
+    setTimeout(()=>w.remove(), 7000);
+  }
+
+  setInterval(()=>{
+    if(document.getElementById("slidereminder").classList.contains("active")){
+      dropCompliment();
+    }
+  }, 350);
+</script>
+
+</body>
+</html>
